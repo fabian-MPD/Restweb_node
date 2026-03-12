@@ -1,0 +1,1 @@
+1 clonar el .env.templete y crear el .env
