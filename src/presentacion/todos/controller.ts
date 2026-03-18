@@ -96,7 +96,7 @@ export class todoController {
            
             
         } catch (error) {
-            
+            res.status(500).json({})
         }
 
     }
