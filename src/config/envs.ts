@@ -9,6 +9,6 @@ import envVar from 'env-var'
 
 export const envs = {
 
-    PORT: envVar.get('PORT').required().asPortNumber(),
+    PORT: envVar.get('PORT').default('3000').asPortNumber(),
     PUBLIC_PATH : envVar.get('PUBLIC_PATH').default('public').required().asString(),
 }
