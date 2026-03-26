@@ -9,7 +9,7 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "ESNext",
+    "module": "NodeNext",
     "target": "ES2023",
     "types": ["node"],
     // For nodejs:
@@ -42,7 +42,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
 
   }
