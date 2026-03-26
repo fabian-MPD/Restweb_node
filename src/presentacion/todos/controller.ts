@@ -1,7 +1,7 @@
 
 import { type Request, type Response } from "express"
 import { prisma } from "../../Data/postgres"
-import { createTodosV, updateTodosV } from "../../domain/dtos/todos"
+import { createTodosV, updateTodosV } from "../../domain/dtos/todos/index"
 
 
 
