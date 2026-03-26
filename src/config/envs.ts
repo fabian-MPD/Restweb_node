@@ -11,4 +11,5 @@ export const envs = {
 
     PORT: envVar.get('PORT').required().asPortNumber(),
     PUBLIC_PATH : envVar.get('PUBLIC_PATH').default('public').required().asString(),
+    POSTGRES_URL : envVar.get('POSTGRES_URL').required().asString(),
 }

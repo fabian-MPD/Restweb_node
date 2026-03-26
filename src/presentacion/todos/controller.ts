@@ -1,45 +1,52 @@
-import strict from "assert/strict"
-import { error } from "console"
-import { type Request, type Response } from "express"
 
-const todos = 
-            [
-                {id: 1, nombre : 'paola',  edad:34, fecha: new Date()},
-                {id: 2, nombre : 'fabian', edad:34, fecha: new Date()},
-                {id: 3, nombre : 'fabian', edad:34, fecha: new Date()},
-            ]
+import { type Request, type Response } from "express"
+import { prisma } from "../../Data/postgres"
+import { createTodosV, updateTodosV } from "../../domain/dtos/todos"
+
+
 
 
 export class todoController {
 
-    constructor(){
+    constructor() {
 
     }
 
 
-    public getTodo = (req:Request, res:Response)=>{
+    public getTodo = async  (req: Request, res: Response) => {
 
-             return res.json(todos)
+        const todos = await prisma.todo.findMany();
 
-        }
+        if(!todos) return res.status(400).json({error:'No hay usurios'})
 
-    public gettodoByid = (req:Request, res: Response) => {
+        return res.json(todos)
+
+    }
+
+    public gettodoByid = async (req: Request, res: Response) => {
 
         try {
 
-            const id  =  Number(req.params.id)
+            const id = Number(req.params.id)
 
-            if (isNaN(id)){
+            if (isNaN(id)) {
 
-                return res.status(400).json({ error:  `este no es un  id valido`})
-            } 
+                return res.status(400).json({ error: `este no es un  id valido` })
+            }
 
-            const todo = todos.find(todo => todo.id == id)
+            const todo = await prisma.todo.findUnique({
+                where: {
+                    id: id
+                }
+            })
 
-            return ( todo ) 
-                ?  res.status(200).json({todo}) 
-                :  res.status(404).json({error:`no se encuentra ningun usuario con el id ${id}`})
-            
+            if (!todo) {
+
+                return res.status(404).json({ error: `no se encuentra ningun usuario con el id ${id}` })
+            }
+
+            res.status(200).json({ todo })
+
         } catch (error) {
 
             res.status(500).json(error)
@@ -47,54 +54,91 @@ export class todoController {
     }
 
 
-    public crearTodo = (req:Request, res:Response) => {
+    public crearTodo = async (req: Request, res: Response) => {
 
         try {
 
-            const {Nombre, edad} = req.body
-    
-            if(!Nombre) throw new Error('Se  requiere el nombre');
+            const [error, crearTodoDto]= createTodosV.create(req.body)
 
-            const newTodo = {
-                id:  todos.length + 1,
-                nombre: Nombre,
-                edad : edad,
-                fecha : new Date()
-            }
+            if (error) return res.status(400).json(error);
 
-          todos.push(newTodo)
-            
-        
-            return res.json(newTodo)
-            
+            const todo = await prisma.todo.create({
+                data:{
+
+                    nombre:crearTodoDto!.Nombre,
+                    edad: crearTodoDto!.edad,
+                    fecha:crearTodoDto!.fecha
+                    
+                } 
+            })
+
+            return res.json(todo)
+
         } catch (error) {
-            
+
         }
     }
 
-    public EliminarTodo = (req:Request, res:Response) =>{
+    public actulizar = async (req:Request, res: Response) =>{
+
 
         try {
-            console.log('ingrese')
-            const id = Number(req.params.id)
-            
-            console.log(id)
-            console.log('ingrese2')
+            const id = Number(req.params.id);
+           const [error ,  updateTodos ] = updateTodosV.create({...req.body, id})
     
-            if(isNaN(id))  return res.status(400).json('id no valido')
+            if(error) return res.status(400).json(error)
+    
+    
+            const todoUp = await prisma.todo.update({
+                where : { id : id},
+                data: updateTodos!.value    
+            });
+
             
-            const indexTodo = todos.findIndex((todo)=> todo.id == id);
 
-            if(indexTodo == -1 ){
+            res.status(200).json(todoUp)
 
-                return res.status(400).json({error:'Id no existe o ya fue eleminado'})
+            
+        } catch (error: any ) {
+
+            if(error.code == "P2025"){
+                
+                return res.status(404).json({error:'Usuario no encontrado'})
             }
 
-            const deleteTodo = todos.splice(indexTodo,1)
+            res.status(500).json(error)
+        }
 
-            res.status(200).json(`usuario de  ${deleteTodo[0]?.nombre} fue eliminado ${deleteTodo[0]?.id}`)
-           
-            
+    }
+
+    public EliminarTodo = async (req: Request, res: Response) => {
+
+        try {
+        
+            const id = Number(req.params.id)
+
+            if (isNaN(id)) return res.status(400).json('id no valido')
+
+            const indexTodo = await prisma.todo.findUnique({
+                where: {
+                    id: id
+                }
+            })
+
+            if (!indexTodo) {
+
+                return res.status(400).json({ error: 'Id no existe o ya fue eleminado' })
+            }
+
+            const deleteTodo = await prisma.todo.delete({
+                where:{
+                    id : id
+                }
+            })
+
+            res.status(200).json(deleteTodo)
+
+
         } catch (error) {
             res.status(500).json({})
         }

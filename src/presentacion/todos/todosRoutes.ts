@@ -16,6 +16,7 @@ export class AppRouterTodo {
         router.get('/:id', todosContr.gettodoByid);
         router.post('/', todosContr.crearTodo);
         router.delete('/:id', todosContr.EliminarTodo);
+        router.patch('/:id', todosContr.actulizar);
 
         return router;
     }
